@@ -1,0 +1,2 @@
+serviceClass: com.mynameistodd.tappytap.server.client.GreetingService
+path: 5D61CC3CFDA2F52F4E99EED8FA34AFA6.gwt.rpc
