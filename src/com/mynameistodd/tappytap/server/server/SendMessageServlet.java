@@ -45,6 +45,7 @@ public class SendMessageServlet extends BaseServlet {
 
   static final String PARAMETER_DEVICE = "device";
   static final String PARAMETER_MULTICAST = "multicastKey";
+  static final String PARAMETER_MESSAGE = "message";
 
   private Sender sender;
 
@@ -96,14 +97,16 @@ public class SendMessageServlet extends BaseServlet {
           return;
       }
     }
+    String message = req.getParameter(PARAMETER_MESSAGE);
+    
     String regId = req.getParameter(PARAMETER_DEVICE);
     if (regId != null) {
-      sendSingleMessage(regId, resp);
+      sendSingleMessage(regId, resp, message);
       return;
     }
     String multicastKey = req.getParameter(PARAMETER_MULTICAST);
     if (multicastKey != null) {
-      sendMulticastMessage(multicastKey, resp);
+      sendMulticastMessage(multicastKey, resp, message);
       return;
     }
     logger.severe("Invalid request!");
@@ -111,14 +114,14 @@ public class SendMessageServlet extends BaseServlet {
     return;
   }
 
-  private Message createMessage() {
-    Message message = new Message.Builder().build();
+  private Message createMessage(String messageText) {
+    Message message = new Message.Builder().addData("key1", messageText).build();
     return message;
   }
 
-  private void sendSingleMessage(String regId, HttpServletResponse resp) {
+  private void sendSingleMessage(String regId, HttpServletResponse resp, String messageText) {
     logger.info("Sending message to device " + regId);
-    Message message = createMessage();
+    Message message = createMessage(messageText);
     Result result;
     try {
       result = sender.sendNoRetry(message, regId);
@@ -152,10 +155,10 @@ public class SendMessageServlet extends BaseServlet {
   }
 
   private void sendMulticastMessage(String multicastKey,
-      HttpServletResponse resp) {
+      HttpServletResponse resp, String messageText) {
     // Recover registration ids from datastore
     List<String> regIds = Datastore.getMulticast(multicastKey);
-    Message message = createMessage();
+    Message message = createMessage(messageText);
     MulticastResult multicastResult;
     try {
       multicastResult = sender.sendNoRetry(message, regIds);

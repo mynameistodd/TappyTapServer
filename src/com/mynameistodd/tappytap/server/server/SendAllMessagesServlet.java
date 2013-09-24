@@ -21,6 +21,8 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
+import com.googlecode.objectify.Objectify;
+import com.googlecode.objectify.ObjectifyService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,6 +51,15 @@ public class SendAllMessagesServlet extends BaseServlet {
     if (devices.isEmpty()) {
       status = "Message ignored as there is no device registered!";
     } else {
+    	
+    	String messageText = req.getParameter("message");
+    	
+    	Objectify ofy = ObjectifyService.ofy();
+    	
+    	Message msg = new Message(messageText);
+    	ofy.save().entity(msg).now();
+    	
+    	
       Queue queue = QueueFactory.getQueue("gcm");
       // NOTE: check below is for demonstration purposes; a real application
       // could always send a multicast, even for just one recipient
@@ -56,7 +67,7 @@ public class SendAllMessagesServlet extends BaseServlet {
         // send a single message using plain post
         String device = devices.get(0);
         queue.add(withUrl("/send").param(
-            SendMessageServlet.PARAMETER_DEVICE, device));
+            SendMessageServlet.PARAMETER_DEVICE, device).param(SendMessageServlet.PARAMETER_MESSAGE, messageText));
         status = "Single message queued for registration id " + device;
       } else {
         // send a multicast message using JSON

@@ -56,6 +56,7 @@ public class HomeServlet extends BaseServlet {
     } else {
       out.print("<h2>" + total + " device(s) registered!</h2>");
       out.print("<form name='form' method='POST' action='sendAll'>");
+      out.print("<input type='text' name='message' />");
       out.print("<input type='submit' value='Send Message' />");
       out.print("</form>");
     }
